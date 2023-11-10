@@ -4,9 +4,9 @@
     'name' => 'nisseieblo',
     'env' => 'local',
     'debug' => true,
-    'url' => 'http://localhost/nissei/public',
+    'url' => 'https://vn-sys.eblo.biz/public',
     'asset_url' => NULL,
-    'front_url' => 'http://localhost/nissei',
+    'front_url' => 'https://vn-sys.eblo.biz',
     'timezone' => 'Asia/Bangkok',
     'locale' => 'en',
     'fallback_locale' => 'en',
@@ -174,7 +174,7 @@
       'file' => 
       array (
         'driver' => 'file',
-        'path' => 'C:\\xampp\\htdocs\\nissei\\storage\\framework/cache/data',
+        'path' => 'C:\\xampp\\htdocs\\nissei-eblo-pm\\storage\\framework/cache/data',
       ),
       'memcached' => 
       array (
@@ -502,10 +502,10 @@
     'orientation' => 'portrait',
     'defines' => 
     array (
-      'font_dir' => 'C:\\xampp\\htdocs\\nissei\\storage\\fonts/',
-      'font_cache' => 'C:\\xampp\\htdocs\\nissei\\storage\\fonts/',
+      'font_dir' => 'C:\\xampp\\htdocs\\nissei-eblo-pm\\storage\\fonts/',
+      'font_cache' => 'C:\\xampp\\htdocs\\nissei-eblo-pm\\storage\\fonts/',
       'temp_dir' => 'C:\\Users\\PC\\AppData\\Local\\Temp',
-      'chroot' => 'C:\\xampp\\htdocs\\nissei',
+      'chroot' => 'C:\\xampp\\htdocs\\nissei-eblo-pm',
       'enable_font_subsetting' => false,
       'pdf_backend' => 'CPDF',
       'default_media_type' => 'screen',
@@ -528,12 +528,12 @@
       'local' => 
       array (
         'driver' => 'local',
-        'root' => 'C:\\xampp\\htdocs\\nissei\\storage\\app',
+        'root' => 'C:\\xampp\\htdocs\\nissei-eblo-pm\\storage\\app',
       ),
       'public' => 
       array (
         'driver' => 'local',
-        'root' => 'C:\\xampp\\htdocs\\nissei\\storage\\app/public',
+        'root' => 'C:\\xampp\\htdocs\\nissei-eblo-pm\\storage\\app/public',
         'visibility' => 'public',
       ),
       's3' => 
@@ -548,87 +548,87 @@
       'user_avtar' => 
       array (
         'driver' => 'local',
-        'root' => 'C:\\xampp\\htdocs\\nissei\\public/uploads/profile',
+        'root' => 'C:\\xampp\\htdocs\\nissei-eblo-pm\\public/uploads/profile',
       ),
       'login_bg' => 
       array (
         'driver' => 'local',
-        'root' => 'C:\\xampp\\htdocs\\nissei\\public/uploads/login_bg',
+        'root' => 'C:\\xampp\\htdocs\\nissei-eblo-pm\\public/uploads/login_bg',
       ),
       'company_logo' => 
       array (
         'driver' => 'local',
-        'root' => 'C:\\xampp\\htdocs\\nissei\\public/uploads/company_logo',
+        'root' => 'C:\\xampp\\htdocs\\nissei-eblo-pm\\public/uploads/company_logo',
       ),
       'company_sidebar_logo' => 
       array (
         'driver' => 'local',
-        'root' => 'C:\\xampp\\htdocs\\nissei\\public/uploads/company_sidebar_logo',
+        'root' => 'C:\\xampp\\htdocs\\nissei-eblo-pm\\public/uploads/company_sidebar_logo',
       ),
       'sidebar_background_images' => 
       array (
         'driver' => 'local',
-        'root' => 'C:\\xampp\\htdocs\\nissei\\public/uploads/sidebar_background_images',
+        'root' => 'C:\\xampp\\htdocs\\nissei-eblo-pm\\public/uploads/sidebar_background_images',
       ),
       'translation' => 
       array (
         'driver' => 'local',
-        'root' => 'C:\\xampp\\htdocs\\nissei\\public/uploads/translation',
+        'root' => 'C:\\xampp\\htdocs\\nissei-eblo-pm\\public/uploads/translation',
       ),
       'project_uploads' => 
       array (
         'driver' => 'local',
-        'root' => 'C:\\xampp\\htdocs\\nissei\\public/uploads/project',
+        'root' => 'C:\\xampp\\htdocs\\nissei-eblo-pm\\public/uploads/project',
       ),
       'project_attachment' => 
       array (
         'driver' => 'local',
-        'root' => 'C:\\xampp\\htdocs\\nissei\\public/uploads/project_attachment',
+        'root' => 'C:\\xampp\\htdocs\\nissei-eblo-pm\\public/uploads/project_attachment',
       ),
       'task_attachment' => 
       array (
         'driver' => 'local',
-        'root' => 'C:\\xampp\\htdocs\\nissei\\public/uploads/task_attachment',
+        'root' => 'C:\\xampp\\htdocs\\nissei-eblo-pm\\public/uploads/task_attachment',
       ),
       'defect' => 
       array (
         'driver' => 'local',
-        'root' => 'C:\\xampp\\htdocs\\nissei\\public/uploads/defect',
+        'root' => 'C:\\xampp\\htdocs\\nissei-eblo-pm\\public/uploads/defect',
       ),
       'defect_attachment' => 
       array (
         'driver' => 'local',
-        'root' => 'C:\\xampp\\htdocs\\nissei\\public/uploads/defect_attachment',
+        'root' => 'C:\\xampp\\htdocs\\nissei-eblo-pm\\public/uploads/defect_attachment',
       ),
       'incident_attachment' => 
       array (
         'driver' => 'local',
-        'root' => 'C:\\xampp\\htdocs\\nissei\\public/uploads/incident_attachment',
+        'root' => 'C:\\xampp\\htdocs\\nissei-eblo-pm\\public/uploads/incident_attachment',
       ),
       'category_attachment' => 
       array (
         'driver' => 'local',
-        'root' => 'C:\\xampp\\htdocs\\nissei\\public/uploads/category_attachment',
+        'root' => 'C:\\xampp\\htdocs\\nissei-eblo-pm\\public/uploads/category_attachment',
       ),
       'article_attachment' => 
       array (
         'driver' => 'local',
-        'root' => 'C:\\xampp\\htdocs\\nissei\\public/uploads/article_attachment',
+        'root' => 'C:\\xampp\\htdocs\\nissei-eblo-pm\\public/uploads/article_attachment',
       ),
       'leave_attachment' => 
       array (
         'driver' => 'local',
-        'root' => 'C:\\xampp\\htdocs\\nissei\\public/uploads/leave_attachment',
+        'root' => 'C:\\xampp\\htdocs\\nissei-eblo-pm\\public/uploads/leave_attachment',
       ),
       'estimate_logo' => 
       array (
         'driver' => 'local',
-        'root' => 'C:\\xampp\\htdocs\\nissei\\public/uploads/estimate_logo',
+        'root' => 'C:\\xampp\\htdocs\\nissei-eblo-pm\\public/uploads/estimate_logo',
       ),
       'invoice_logo' => 
       array (
         'driver' => 'local',
-        'root' => 'C:\\xampp\\htdocs\\nissei\\public/uploads/invoice_logo',
+        'root' => 'C:\\xampp\\htdocs\\nissei-eblo-pm\\public/uploads/invoice_logo',
       ),
     ),
   ),
@@ -712,13 +712,13 @@
       'single' => 
       array (
         'driver' => 'single',
-        'path' => 'C:\\xampp\\htdocs\\nissei\\storage\\logs/laravel.log',
+        'path' => 'C:\\xampp\\htdocs\\nissei-eblo-pm\\storage\\logs/laravel.log',
         'level' => 'debug',
       ),
       'daily' => 
       array (
         'driver' => 'daily',
-        'path' => 'C:\\xampp\\htdocs\\nissei\\storage\\logs/laravel.log',
+        'path' => 'C:\\xampp\\htdocs\\nissei-eblo-pm\\storage\\logs/laravel.log',
         'level' => 'debug',
         'days' => 14,
       ),
@@ -782,7 +782,7 @@
       'theme' => 'default',
       'paths' => 
       array (
-        0 => 'C:\\xampp\\htdocs\\nissei\\resources\\views/vendor/mail',
+        0 => 'C:\\xampp\\htdocs\\nissei-eblo-pm\\resources\\views/vendor/mail',
       ),
     ),
     'log_channel' => NULL,
@@ -793,7 +793,7 @@
     'stubs' => 
     array (
       'enabled' => false,
-      'path' => 'C:\\xampp\\htdocs\\nissei/vendor/nwidart/laravel-modules/src/Commands/stubs',
+      'path' => 'C:\\xampp\\htdocs\\nissei-eblo-pm/vendor/nwidart/laravel-modules/src/Commands/stubs',
       'files' => 
       array (
         'routes/web' => 'Routes/web.php',
@@ -836,9 +836,9 @@
     ),
     'paths' => 
     array (
-      'modules' => 'C:\\xampp\\htdocs\\nissei\\Modules',
-      'assets' => 'C:\\xampp\\htdocs\\nissei\\public\\modules',
-      'migration' => 'C:\\xampp\\htdocs\\nissei\\database/migrations',
+      'modules' => 'C:\\xampp\\htdocs\\nissei-eblo-pm\\Modules',
+      'assets' => 'C:\\xampp\\htdocs\\nissei-eblo-pm\\public\\modules',
+      'migration' => 'C:\\xampp\\htdocs\\nissei-eblo-pm\\database/migrations',
       'generator' => 
       array (
         'config' => 
@@ -963,7 +963,7 @@
       'enabled' => false,
       'paths' => 
       array (
-        0 => 'C:\\xampp\\htdocs\\nissei\\vendor/*/*',
+        0 => 'C:\\xampp\\htdocs\\nissei-eblo-pm\\vendor/*/*',
       ),
     ),
     'composer' => 
@@ -1083,7 +1083,7 @@
     'lifetime' => '120',
     'expire_on_close' => false,
     'encrypt' => false,
-    'files' => 'C:\\xampp\\htdocs\\nissei\\storage\\framework/sessions',
+    'files' => 'C:\\xampp\\htdocs\\nissei-eblo-pm\\storage\\framework/sessions',
     'connection' => NULL,
     'table' => 'sessions',
     'store' => NULL,
@@ -1103,13 +1103,9 @@
   array (
     'paths' => 
     array (
-      0 => 'C:\\xampp\\htdocs\\nissei\\resources\\views',
+      0 => 'C:\\xampp\\htdocs\\nissei-eblo-pm\\resources\\views',
     ),
-    'compiled' => 'C:\\xampp\\htdocs\\nissei\\storage\\framework\\views',
-  ),
-  'debug-server' => 
-  array (
-    'host' => 'tcp://127.0.0.1:9912',
+    'compiled' => 'C:\\xampp\\htdocs\\nissei-eblo-pm\\storage\\framework\\views',
   ),
   'trustedproxy' => 
   array (

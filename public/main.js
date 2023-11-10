@@ -10434,8 +10434,10 @@ __webpack_require__.r(__webpack_exports__);
 var environment;
 environment = {
     production: false,
-    apiUrl: 'https://vn-sys.eblo.biz/public'
+    // apiUrl: 'http://localhost/nissei-eblo-pm/public'
+    apiUrl: 'https://vn-sys.eblo.biz'
 };
+
 
 /***/ }),
 

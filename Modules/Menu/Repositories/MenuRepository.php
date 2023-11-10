@@ -153,7 +153,7 @@ class MenuRepository
                 }
             }
         }
-    
+
         return true;
     }
 
@@ -171,6 +171,7 @@ class MenuRepository
 
         // --
         // Get departments/roles
+
         if (!empty(\Auth::user())) {
             $roles = \Auth::user()->roles()->get()->pluck('id');
             $departments = \Auth::user()->departments()->get()->pluck('id');
@@ -221,11 +222,11 @@ class MenuRepository
         foreach ($elements as $element) {
             if ($element['parent_menu_id'] == $parentId) {
                 $children = self::buildMenu($elements, $element['id']);
-                
+
                 if ($children) {
                     $element['children'] = $children;
                 }
-                
+
                 $branch[] = $element;
             }
         }
@@ -260,12 +261,12 @@ class MenuRepository
 
             if ($element->parent_menu_id == $parentId) {
                 $submenu = self::buildSidebarMenu($elements, $element->id);
-                
+
                 if ($submenu) {
                     $element->class = 'has-sub';
                     $element->submenu = $submenu;
                 }
-                
+
                 $branch[] = $element;
             }
         }
