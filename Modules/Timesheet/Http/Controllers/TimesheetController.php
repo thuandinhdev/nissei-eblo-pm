@@ -112,9 +112,9 @@ class TimesheetController extends Controller
     {
         // --
         // Check role/permission
-        if (!AdminHelper::can_action(29, 'created')) {
-            return response()->json("Access denied", 403);
-        }
+        // if (!AdminHelper::can_action(29, 'created')) {
+        //     return response()->json("Access denied", 403);
+        // }
 
         if ($this->timesheetRepo->create($request)) {
             return response()->json('success');

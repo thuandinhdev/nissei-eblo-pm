@@ -107,8 +107,8 @@ class IncidentCommentRepository
                 $incidentHistory = new IncidentHistory;
                 $incidentHistory->created_by_id = $incident->create_user_id;
                 $incidentHistory->updated_by_id = Auth::user()->id;
-                $incidentHistory->description = "incident information commented : "
-                 . '<b>'.$incident->incident_name.'</b>';
+                $incidentHistory->description = "Incident information commented : "
+                 . '<b>'.$incidentComment->comment.'</b>';
                 $incidentHistory->commented_by_id = Auth::user()->id;
                 $incident->history()->save($incidentHistory);
             }

@@ -133,8 +133,8 @@ trait UserRelationship
 			config('core.acl.project_user_table'),
 			'user_id',
 			'project_id'
-		)
-		->withPivot('edit', 'delete');
+        )
+		->withPivot('view', 'edit', 'delete');
 
 		if ($assign) {
 			$projects->wherePivot('edit', 1);

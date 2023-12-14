@@ -40,7 +40,7 @@ class SlackController extends Controller
 		if (null !== $request->get('code')) {
 			$userId = $request->get('state');
 			$settings = SlackSetting::select(['slack_client_id', 'slack_client_secret', 'slack_redirect_URL'])->first();
-		
+
 			// --
 			// Get token
 			$curl = curl_init();
@@ -98,7 +98,6 @@ class SlackController extends Controller
 		} elseif (null !== $request->get('error')) {
 			$url = config('app.front_url').'?error='. $request->get('error');
 		}
-
 		return redirect($url);
 	}
 

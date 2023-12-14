@@ -78,7 +78,7 @@ trait TaskAttribute
      */
     public function getIsOverdueAttribute()
     {
-        if (in_array($this->status, [1, 2, 4]) && $this->planned_end_date < date('Y-m-d')) {
+        if (in_array($this->status, [1, 2, 4]) && $this->task_end_date < date('Y-m-d')) {
             $endDate = Carbon::parse($this->task_end_date);
             return Carbon::parse(Carbon::now())->diffInDays($endDate);
         }

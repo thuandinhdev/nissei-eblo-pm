@@ -3,6 +3,7 @@
 namespace Modules\Incident\Repositories;
 
 use Auth;
+use Carbon\Carbon;
 use DB;
 use Modules\CustomField\Models\CustomField;
 use Modules\Helper\Helpers\EmailsHelper;
@@ -11,11 +12,11 @@ use Modules\Incident\Models\Incident;
 use Modules\Incident\Models\IncidentHistory;
 use Modules\Incident\Models\IncidentUser;
 use Modules\Projects\Models\Project;
+use Modules\Slack\Repositories\SlackRepository;
 use Modules\Team\Models\Team;
 use Modules\Timesheet\Models\Timesheet;
 use Modules\UserActivity\Models\UserActivity;
 use Modules\User\Models\User\User;
-use Modules\Slack\Repositories\SlackRepository;
 
 /**
  * Class IncidentRepository
@@ -138,9 +139,13 @@ class IncidentRepository
         if ($status) {
             if ($status == 1) {
                 $incident->whereIn($incident_table.'.status', [1, 6]);
-            }elseif ($status == 4) {
+            } elseif ($status == 4) {
                 $incident->whereIn($incident_table.'.status', [4, 5, 7]);
-            }else{
+            } elseif ($status == 8) {
+                // Overdue
+                $incident->whereIn($incident_table.'.status', [1, 2, 3, 6])
+                    ->whereDate($incident_table.'.end_date', '<', Carbon::now());
+            } else{
                 $incident->whereIn($incident_table.'.status', [$status]);
             }
         }
@@ -174,15 +179,13 @@ class IncidentRepository
             ->orderBy($order, $dir)
             ->get();
 
-        $json_data = array(
+        return array(
             "draw"            => intval($request->input('draw')),
             "recordsTotal"    => intval($totalData),
             "recordsFiltered" => intval($totalFiltered),
             "statusCount"     => $statusCount,
             "data"            => $data
         );
-
-        return $json_data;
     }
 
     /**
@@ -195,7 +198,7 @@ class IncidentRepository
     private function _getAllIncidentCount($isMy = false)
     {
         $user = Auth::user();
-        $result['all'] =  $this->_getStatusWiseCount([1,2,3,4,5,6,7], $user, $isMy);
+        $result['all'] =  $this->_getStatusWiseCount([1, 2, 3, 4, 5, 6, 7], $user, $isMy);
         if ($result['all'] > 0) {
             $result['open'] = $this->_getStatusWiseCount([1], $user, $isMy);
             $result['assigned'] = $this->_getStatusWiseCount([2], $user, $isMy);
@@ -204,6 +207,7 @@ class IncidentRepository
             $result['deferred'] = $this->_getStatusWiseCount([5], $user, $isMy);
             $result['re_open'] = $this->_getStatusWiseCount([6], $user, $isMy);
             $result['closed'] = $this->_getStatusWiseCount([7], $user, $isMy);
+            $result['overdue'] = $this->_getOverdueCount($user, $isMy);
         }
         return $result;
     }
@@ -231,6 +235,30 @@ class IncidentRepository
                 ->whereIn('status', $status)
                 ->count();
         }
+    }
+
+    /**
+     * Incident overdue counting.
+     *
+     * @param object $user   [User object]
+     * @param Boolean $isMy  [For all incident or user incident]
+     *
+     * @return Count
+     */
+    private function _getOverdueCount($user, $isMy)
+    {
+        if ($isMy) {
+            $overdueIncident = Incident::where(function ($query) use ($user) {
+                $query->where('assign_to', $user->id)
+                    ->orWhere('create_user_id', $user->id);
+            });
+        } else {
+            $overdueIncident = $user->incidents();
+        }
+
+        return $overdueIncident->whereIn('status', [1, 2, 3, 6])
+            ->whereDate('end_date', '<', Carbon::now())
+            ->count();
     }
 
     /**
@@ -306,7 +334,7 @@ class IncidentRepository
         ])
         ->where('id', $id)
         ->first();
-
+        
         if ($incident) {
             $incident['custom_fields'] = CustomField::getViewFields(4)->get();
             $incident['activities'] = UserActivity::getActivities(['Incident','IncidentComment','IncidentAttachment'],$id)->get();
@@ -372,7 +400,7 @@ class IncidentRepository
 
             // --
             // Post message to slack
-            //$this->slackRepo->postActivitiesMessage('Incident Created Successfully', $incident, 'Incident');
+            $this->slackRepo->postActivitiesMessage('Incident Created Successfully', $incident, 'Incident');
 
             // --
             // Create incident history.
@@ -474,13 +502,13 @@ class IncidentRepository
 
             // --
             // Post message to slack
-            //$this->slackRepo->postActivitiesMessage('Incident Updated Successfully', $incident, 'Incident');
+            $this->slackRepo->postActivitiesMessage('Incident Updated Successfully', $incident, 'Incident');
 
             // --
             // Send email.
             // if ($project) {
             //     $uniqueUserId = array_diff( $uniqueUserId, [$project->client_id] ); // Unset client
-            // }
+            // }            
             if ($input['assign_to'] && ($input['assign_to'] != $oldIncident['assign_to'])) {
                 $mailUserId = $super_admin_ids;
                 array_push($mailUserId, $input['assign_to']);
@@ -526,7 +554,7 @@ class IncidentRepository
 
                 // --
                 // Post message to slack
-                //$this->slackRepo->postActivitiesMessage('Incident Deleted Successfully', $incident, 'Incident');
+                $this->slackRepo->postActivitiesMessage('Incident Deleted Successfully', $incident, 'Incident');
 
                 return true;
             }
@@ -561,7 +589,7 @@ class IncidentRepository
 
             // --
             // Post message to slack
-            //$this->slackRepo->postActivitiesMessage('Incident Updated Successfully', $incident, 'Incident');
+            $this->slackRepo->postActivitiesMessage('Incident Updated Successfully', $incident, 'Incident');
 
             return true;
         } else {
@@ -591,7 +619,7 @@ class IncidentRepository
         } else {
             $subjects = $subSubject.' Edit - '.$incident->incident_name;
         }
-
+        
         $userData = User::select('id','firstname', 'lastname','email')
             ->whereIn('id', $uniqueUserId)
             ->where('is_active', 1)
@@ -651,7 +679,7 @@ class IncidentRepository
 
             // --
             // Post message to slack
-            //$this->slackRepo->postActivitiesMessage('Incident Status Changed Successfully', $incident, 'Incident');
+            $this->slackRepo->postActivitiesMessage('Incident Status Changed Successfully', $incident, 'Incident');
 
             // --
             // Send email
@@ -700,8 +728,8 @@ class IncidentRepository
 
             // --
             // Post message to slack
-            //$this->slackRepo->postActivitiesMessage('Incident Severity Changed Successfully', $incident, 'Incident');
-
+            $this->slackRepo->postActivitiesMessage('Incident Severity Changed Successfully', $incident, 'Incident');
+            
             return true;
         }
         return false;
@@ -798,7 +826,7 @@ class IncidentRepository
         $order = $columns[$request->input('order.0.column')];
         $dir = $request->input('order.0.dir');
         $columns_search = $request->input('columns');
-
+        
         $incident = $user->incidents()->leftjoin($project_table, $project_table.'.id', '=', $incident_table.'.project_id')
             ->join($user_table.' as incident_created', 'incident_created.id', '=', $incident_table.'.create_user_id')
             ->leftjoin($user_table.' as incident_assigned', 'incident_assigned.id', '=', $incident_table.'.assign_to')
@@ -812,7 +840,7 @@ class IncidentRepository
                 'incident_assigned.lastname as assigned_lastname',
                 'incident_assigned.avatar as assigned_avatar'
             );
-
+            
         $matchThese = [];
         foreach ((array)$columns_search as $key => $value) {
             if (!empty($value['search']['value'])) {
@@ -863,7 +891,7 @@ class IncidentRepository
             $query->where('assign_to', $user->id)
                 ->orWhere('create_user_id', $user->id);
         })
-        ->whereNotIn('status', [4,7])
+        ->whereNotIn('status', [4, 5, 7])
         ->orderBy('created_at', 'DESC')
         ->get();
     }

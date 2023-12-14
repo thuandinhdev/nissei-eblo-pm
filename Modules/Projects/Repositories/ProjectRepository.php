@@ -152,7 +152,13 @@ class ProjectRepository
 		->leftjoin($team_table, $team_table.'.id', '=', $project_table.'.assign_to');
 
 		if (isset($input['statusId']) && $input['statusId']) {
-			$projects = $projects->where($project_table.'.status', $input['statusId']);
+			if ($input['statusId'] == 6) {
+				// Overdue
+				$projects = $projects->whereIn($project_table.'.status', [1, 2])
+					->whereDate($project_table.'.end_date', '<', Carbon::now());
+			}else{
+				$projects = $projects->where($project_table.'.status', $input['statusId']);
+			}
 		}
 
 		$totalData = $projects->count();
@@ -207,6 +213,10 @@ class ProjectRepository
 		$result['onHold'] = $this->_getStatusWiseCount(3, $user);
 		$result['cancel'] = $this->_getStatusWiseCount(4, $user);
 		$result['completed'] = $this->_getStatusWiseCount(5, $user);
+		$result['overdue'] = $user->projects()
+            ->whereIn('status', [1, 2])
+            ->whereDate('end_date', '<', Carbon::now())
+            ->count();
 		return $result;
 	}
 
@@ -239,8 +249,6 @@ class ProjectRepository
 				}
 			])
 			->select('id', 'project_name', 'project_version', 'assign_members', 'estimated_hours', 'start_date', 'end_date')
-			// ->whereIn($project_table.'.status', [1,2,3])
-			// ->where($project_table.'.end_date', '>=', Carbon::today()->format('Y-m-d'))
 			->orderBy('id', 'desc')
 			->get();
 		return $projects;
@@ -371,7 +379,8 @@ class ProjectRepository
 			}
 		}
 
-		$super_admin_ids = User::where('is_super_admin', 1)->pluck('id')->toArray();
+        // where('is_super_admin', 1)->
+		$super_admin_ids = User::pluck('id')->toArray();
 		$userIds = array_merge($userIds, $super_admin_ids);
 		array_push($userIds, $user->id); // login user
 		if ($input['client_id']) {
@@ -381,9 +390,9 @@ class ProjectRepository
 
 		$assignMembers = array_merge($assignMembers, $super_admin_ids);
 		array_push($assignMembers, $user->id); // login user
-		if ($input['client_id']) {
-			array_push($assignMembers, $input['client_id']);
-		}
+		// if ($input['client_id']) {
+		// 	array_push($assignMembers, $input['client_id']);
+		// }
 		$assignMembers = array_unique($assignMembers);
 
 		if (!empty($input['project_logo'])) {
@@ -416,15 +425,15 @@ class ProjectRepository
 			// --
 			// Post message to slack
 			$project = Project::findOrFail($projects['id']);
-			//$this->slackRepo->postActivitiesMessage('Project Created Successfully', $project, 'Project');
+			$this->slackRepo->postActivitiesMessage('Project Created Successfully', $project, 'Project');
 
 			// --
 			// User sync
 			if ($projects->users()->sync($userIds)) {
 				$projects->users()->updateExistingPivot($assignMembers, ['edit' => true,'delete' => true]);
-				if ($input['client_id']) {
-					$assignMembers = array_diff($assignMembers, [$input['client_id']]); // Unset client
-				}
+				// if ($input['client_id']) {
+				// 	$assignMembers = array_diff($assignMembers, [$input['client_id']]); // Unset client
+				// }
 				$userData = User::select('email')
 					->whereIn('id', $assignMembers)
 					->where('is_active', '=', 1)
@@ -487,16 +496,16 @@ class ProjectRepository
 			}
 		}
 
-		$old_version = $project->project_version;
-		$current_version = explode(',', $old_version);
-		$current_version = end($current_version);
-		$input['project_version'] = explode(',', $input['project_version']);
-		$input['project_version'] = end($input['project_version']);
-		if ($input['project_version'] != $current_version) {
-			$input['project_version'] = $old_version.','.$input['project_version'];
-		} else {
-			$input['project_version'] = $old_version;
-		}
+		// $old_version = $project->project_version;
+		// $current_version = explode(',', $old_version);
+		// $current_version = end($current_version);
+		// $input['project_version'] = explode(',', $input['project_version']);
+		// $input['project_version'] = end($input['project_version']);
+		// if ($input['project_version'] != $current_version) {
+		// 	$input['project_version'] = $old_version.','.$input['project_version'];
+		// } else {
+		// 	$input['project_version'] = $old_version;
+		// }
 
 		if (is_array($input['assign_members']) && count($input['assign_members']) > 0) {
 			foreach ($input['assign_members'] as $value) {
@@ -508,7 +517,8 @@ class ProjectRepository
 			$input['assign_members'] = 'Unassign';
 		}
 
-		$super_admin_ids = User::where('is_super_admin', 1)->pluck('id')->toArray();
+        // where('is_super_admin', 1)->
+		$super_admin_ids = User::pluck('id')->toArray();
 
 		$userIds = [];
 		if (!empty($input['users'])) {
@@ -525,9 +535,9 @@ class ProjectRepository
 
 		$assignMembers = array_merge($assignMembers, $super_admin_ids);
 		array_push($assignMembers, $user->id); // login user
-		if ($input['client_id']) {
-			array_push($assignMembers, $input['client_id']);
-		}
+		// if ($input['client_id']) {
+		// 	array_push($assignMembers, $input['client_id']);
+		// }
 		$assignMembers = array_unique($assignMembers);
 
 		if ($project->fill($input)->save()) {
@@ -550,7 +560,7 @@ class ProjectRepository
 
 			// --
 			// Post message to slack
-			//$this->slackRepo->postActivitiesMessage('Project Updated Successfully', $project, 'Project');
+			$this->slackRepo->postActivitiesMessage('Project Updated Successfully', $project, 'Project');
 
 			foreach ($userIds as $key => $value) {
 				if (in_array($value, $assignMembers)) {
@@ -646,7 +656,7 @@ class ProjectRepository
 
 				// --
 				// Post message to slack
-				//$this->slackRepo->postActivitiesMessage('Project Deleted Successfully', $project, 'Project');
+				$this->slackRepo->postActivitiesMessage('Project Deleted Successfully', $project, 'Project');
 
 				return true;
 			}
@@ -691,7 +701,7 @@ class ProjectRepository
 
 				// --
 				// Post message to slack
-				//$this->slackRepo->postActivitiesMessage('Project Status Changed Successfully', $project, 'Project');
+				$this->slackRepo->postActivitiesMessage('Project Status Changed Successfully', $project, 'Project');
 			}
 
 			return true;
@@ -1103,7 +1113,13 @@ class ProjectRepository
 
 
 		if (isset($input['statusId']) && $input['statusId']) {
-			$projects = $projects->where($project_table.'.status', $input['statusId']);
+			if ($input['statusId'] == 6) {
+				// Overdue
+				$projects = $projects->whereIn($project_table.'.status', [1, 2])
+					->whereDate($project_table.'.end_date', '<', Carbon::now());
+			}else{
+				$projects = $projects->where($project_table.'.status', $input['statusId']);
+			}
 		}
 
 		$projects = $projects->orderBy('id', 'desc')->get();

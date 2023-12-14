@@ -68,6 +68,7 @@ class TaskRepository
     {
         $task_table = config('core.acl.task_table');
         $user_table = config('core.acl.users_table');
+        $projects_table = config('core.acl.projects_table');
         $user = Auth::user();
 
         $columns = array(
@@ -112,8 +113,10 @@ class TaskRepository
         $dir = $request->input('order.0.dir');
 
         $task = $task->leftjoin($user_table, $user_table.'.id', '=', $task_table.'.assign_to')
+            ->leftjoin($projects_table, $projects_table.'.id', '=', $task_table.'.project_id')
             ->select(
                 $task_table.'.*',
+                $projects_table.'.project_name',
                 $user_table.'.firstname as assign_firstname',
                 $user_table.'.lastname as assign_lastname',
                 $user_table.'.avatar as assign_avatar'
@@ -378,7 +381,7 @@ class TaskRepository
             // --
             // Post message to slack
             $task = Task::findOrFail($tasks['id']);
-            //$this->slackRepo->postActivitiesMessage('Task Created Successfully', $task, 'Task');
+            $this->slackRepo->postActivitiesMessage('Task Created Successfully', $task, 'Task');
 
             // --
             // User sync
@@ -481,7 +484,7 @@ class TaskRepository
 
             // --
             // Post message to slack
-            //$this->slackRepo->postActivitiesMessage('Task Updated Successfully', $task, 'Task');
+            $this->slackRepo->postActivitiesMessage('Task Updated Successfully', $task, 'Task');
 
             // --
             // Sync user.
@@ -563,7 +566,7 @@ class TaskRepository
 
             // --
             // Post message to slack
-            //$this->slackRepo->postActivitiesMessage('Task Status Changed Successfully', $task, 'Task');
+            $this->slackRepo->postActivitiesMessage('Task Status Changed Successfully', $task, 'Task');
 
             // --
             // Send email
@@ -656,7 +659,7 @@ class TaskRepository
 
             // --
             // Post message to slack
-            //$this->slackRepo->postActivitiesMessage('Task Updated Successfully', $task, 'Task');
+            $this->slackRepo->postActivitiesMessage('Task Updated Successfully', $task, 'Task');
 
             return true;
         } else {
@@ -700,7 +703,7 @@ class TaskRepository
 
             // --
             // Post message to slack
-            //$this->slackRepo->postActivitiesMessage('Task Deleted Successfully', $task, 'Task');
+            $this->slackRepo->postActivitiesMessage('Task Deleted Successfully', $task, 'Task');
         }
         // --
         // Remove subtask if parent task is deleted also detach users.
@@ -1121,7 +1124,7 @@ class TaskRepository
     public function getTaskForReport($request)
     {
         $task_table = config('core.acl.task_table');
-        $project_table = config('core.acl.projects_table');
+        $projects_table = config('core.acl.projects_table');
         $user_table = config('core.acl.users_table');
         $user = Auth::user();
 
@@ -1138,7 +1141,7 @@ class TaskRepository
             9 => DB::raw("CONCAT($user_table.firstname,' ',$user_table.lastname)"),
             10 => $task_table.'.priority',
             11 => $task_table.'.status',
-            12 => $project_table.'.project_name',
+            12 => $projects_table.'.project_name',
             13 => $task_table.'.project_version'
         );
 
@@ -1151,7 +1154,7 @@ class TaskRepository
 
         $task = $user->tasks()->select(
             $task_table.'.*',
-            $project_table.'.project_name',
+            $projects_table.'.project_name',
             'project_created.firstname as created_firstname',
             'project_created.lastname as created_lastname',
             'project_created.avatar as created_avatar',
@@ -1159,7 +1162,7 @@ class TaskRepository
             $user_table.'.lastname as assign_lastname',
             $user_table.'.avatar as assign_avatar'
         )
-        ->join($project_table, $project_table.'.id', '=', $task_table.'.project_id')
+        ->join($projects_table, $projects_table.'.id', '=', $task_table.'.project_id')
         ->join($user_table.' as project_created', 'project_created.id', '=', $task_table.'.created_by')
         ->leftjoin($user_table, $user_table.'.id', '=', $task_table.'.assign_to');
 
@@ -1308,6 +1311,7 @@ class TaskRepository
      * @return number
      */
     private function timeToSeconds($time) {
+        // dd($time);
         list($hours, $minutes) = explode(":", $time);
 
         return ($hours * 60 * 60) + ($minutes * 60);
@@ -1338,6 +1342,86 @@ class TaskRepository
         if ($tasks) {
             // --
             // Add activities
+            // createUserActivity(
+            //     Task::MODULE_NAME,
+            //     $tasks->id,
+            //     $request->method(),
+            //     $tasks->name,
+            //     $request->ip(),
+            //     $tasks->id
+            // );
+
+            $super_admin_ids = User::where('is_super_admin', 1)->pluck('id')->toArray();
+
+            $userIds = [];
+            if ($project->assign_members != 'Unassign') {
+                $userIds = explode(',', $project->assign_members);
+            }
+
+            $userIds = array_merge($userIds, $super_admin_ids);
+            array_push($userIds, $user->id); // login user
+            if ($project->client_id) {
+                array_push($userIds, $project->client_id); // client
+            }
+            $userIds = array_unique($userIds);
+
+            if ($tasks->users()->sync($userIds)) {
+                // --
+                // Send mail.
+                if ($input['assign_to']) {
+                    $mailUserId = $super_admin_ids;
+                    array_push($mailUserId, $input['assign_to']);
+                    $mailUserId = array_unique($mailUserId);
+                    $this->_sendMailEveryone(
+                        $mailUserId,
+                        $user->firstname.' '.$user->lastname,
+                        $tasks,
+                        'create'
+                    );
+                }
+            }
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public function copyDefectToTask($request){
+        $input = $request->all();
+        $project = Project::findOrFail($input['project_id']);
+
+        // --
+        // Add subtask hours to parent task hours.
+        if (isset($input['estimated_hours'])) {
+            if (isset($input['parent_task_id']) && $input['parent_task_id']) {
+                $parentTask = Task::findOrFail($input['parent_task_id']);
+                $parentTask->estimated_hours = $this->_getTasksEstimatehours([$parentTask->estimated_hours, $input['estimated_hours']], true);
+                $parentTask->save();
+            }
+        }
+
+        $user = Auth::user();
+        $task = new Task;
+        $input['created_by'] = $user->id;
+        $input['order'] = Task::count() + 1;
+        if ($input['status'] == 6) {
+            $input['progress'] = 100;
+        }
+
+        $tasks = $task->create($input);
+
+        if ($tasks) {
+            // --
+            // Save custom field.
+            if (isset($input['custom_fields'])) {
+                $this->helperRepo->saveCustomField(
+                    2,
+                    $tasks['id'],
+                    $input['custom_fields']
+                );
+            }
+            // --
+            // Add activities
             createUserActivity(
                 Task::MODULE_NAME,
                 $tasks->id,
@@ -1347,11 +1431,22 @@ class TaskRepository
                 $tasks->id
             );
 
-            $super_admin_ids = User::where('is_super_admin', 1)->pluck('id')->toArray();
+            // --
+            // Post message to slack
+            $task = Task::findOrFail($tasks['id']);
+            $this->slackRepo->postActivitiesMessage('Task Created Successfully', $task, 'Task');
 
+            // --
+            // User sync
+            $super_admin_ids = User::where('is_super_admin', 1)->pluck('id')->toArray();
             $userIds = [];
-            if ($project->assign_members != 'Unassign') {
-                $userIds = explode(',', $project->assign_members);
+            if (isset($input['users'])
+                && is_array($input['users'])
+                && $input['users'] > 0
+            ) {
+                foreach ($input['users'] as $value) {
+                    $userIds[] = $value;
+                }
             }
 
             $userIds = array_merge($userIds, $super_admin_ids);

@@ -250,17 +250,7 @@ class MailboxController extends Controller
      */
     public function removeAttachementFile(Request $request)
     {
-        $request->validate(
-            [
-            'id' => 'required'
-            ]
-        );
-        
-        // --
-        // Check role/permission
-        if (!AdminHelper::can_action(14, 'deleted')) {
-            return response()->json("Access denied", 403);
-        }
+        $request->validate(['id' => 'required']);
 
         if ($this->mailboxRepo->removeAttachementFile($request)) {
             return response()->json('success');

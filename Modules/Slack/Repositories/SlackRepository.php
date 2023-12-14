@@ -40,11 +40,12 @@ class SlackRepository
 		}
 
         $postData = [];
-        $slack = Slack::where('user_id', \Auth::user()->id)->first();
+        $slack = Slack::first();
 
         if (!empty($slack)) {
             switch ($module) {
             case 'Project':
+                return;
                 $postData = $this->_getProjectModuleMessage($slack, $text, $data);
                 break;
             case 'Task':
@@ -54,6 +55,7 @@ class SlackRepository
                 $postData = $this->_getDefectModuleMessage($slack, $text, $data);
                 break;
             case 'Incident':
+                return;
                 $postData = $this->_getIncidentModuleMessage($slack, $text, $data);
                 break;
             default:
@@ -183,7 +185,7 @@ class SlackRepository
 			]'
         ];
     }
-    
+
     /**
      * Create task activities on slack.
      *
@@ -204,6 +206,11 @@ class SlackRepository
         $task_status_key_value[4] = 'Waiting';
         $task_status_key_value[5] = 'Cancel';
         $task_status_key_value[6] = 'Completed';
+        $task_status_key_value[8] = 'Fixes';
+        $task_status_key_value[9] = 'Done';
+        $task_status_key_value[10] = 'Request to japan';
+        $task_status_key_value[11] = 'Finish';
+
 
         $task_priority_key_value = [];
         $task_priority_key_value[1] = "Urgent";
@@ -212,6 +219,73 @@ class SlackRepository
         $task_priority_key_value[4] = "Medium";
         $task_priority_key_value[5] = "Low";
 
+        // return [
+        //     'channel' => $slack->channel_id,
+        //     // "text" => $text,
+        //     "as_user" => true,
+        //     "blocks" => '[{
+		// 		"type": "section",
+		// 		"text": {
+		// 			"type": "mrkdwn",
+		// 			"text": "'.$text. '\n' . $url .'"
+		// 		}
+		// 	}]',
+        //     "attachments" => '[
+		// 		{
+		// 			"color": "#2F8568",
+		// 			"blocks": [
+		// 				{
+		// 					"type": "section",
+		// 					"fields": [
+		// 						{
+		// 							"type": "mrkdwn",
+		// 							"text": "*Task Name:* \n'.$task->name.'"
+		// 						}
+		// 					]
+		// 				},
+		// 				{
+		// 					"type": "section",
+		// 					"fields": [
+		// 						{
+		// 							"type": "mrkdwn",
+		// 							"text": "*Status:* \n'.$task_status_key_value[$task->status].'"
+		// 						},
+		// 						{
+		// 							"type": "mrkdwn",
+		// 							"text": "*Priority:* \n'.$task_priority_key_value[$task->priority].'"
+		// 						}
+		// 					]
+		// 				},
+		// 				{
+		// 					"type": "section",
+		// 					"fields": [
+		// 						{
+		// 							"type": "mrkdwn",
+		// 							"text": "*Created By:* \n'.$user->firstname .' '.$user->lastname.'"
+		// 						},
+		// 						{
+		// 							"type": "mrkdwn",
+		// 							"text": "*Estimated Hours:* \n'.$task->estimated_hours.'"
+		// 						}
+		// 					]
+		// 				},
+		// 				{
+		// 					"type": "section",
+		// 					"fields": [
+		// 						{
+		// 							"type": "mrkdwn",
+		// 							"text": "*Start Date:* \n'.$task->task_start_date.'"
+		// 						},
+		// 						{
+		// 							"type": "mrkdwn",
+		// 							"text": "*End Date:* \n'.$task->task_end_date.'"
+		// 						}
+		// 					]
+		// 				}
+		// 			]
+		// 		}
+		// 	]'
+        // ];
         return [
             'channel' => $slack->channel_id,
             // "text" => $text,
@@ -243,35 +317,9 @@ class SlackRepository
 									"type": "mrkdwn",
 									"text": "*Status:* \n'.$task_status_key_value[$task->status].'"
 								},
-								{
-									"type": "mrkdwn",
-									"text": "*Priority:* \n'.$task_priority_key_value[$task->priority].'"
-								}
-							]
-						},
-						{
-							"type": "section",
-							"fields": [
-								{
+                                {
 									"type": "mrkdwn",
 									"text": "*Created By:* \n'.$user->firstname .' '.$user->lastname.'"
-								},
-								{
-									"type": "mrkdwn",
-									"text": "*Estimated Hours:* \n'.$task->estimated_hours.'"
-								}
-							]
-						},
-						{
-							"type": "section",
-							"fields": [
-								{
-									"type": "mrkdwn",
-									"text": "*Start Date:* \n'.$task->task_start_date.'"
-								},
-								{
-									"type": "mrkdwn",
-									"text": "*End Date:* \n'.$task->task_end_date.'"
 								}
 							]
 						}
@@ -293,15 +341,17 @@ class SlackRepository
     private function _getDefectModuleMessage($slack, $text, $defect)
     {
         $user = \Auth::user();
-        $url = config('app.front_url').'/#/defects/detail/'.$defect->id;
+        $url = config('app.front_url').'/#/requirements/detail/'.$defect->id;
         $defect_status_key_value = [];
-        $defect_status_key_value[1] = 'Assigned';
+        $defect_status_key_value[1] = 'Open';
         $defect_status_key_value[2] = 'Closed';
         $defect_status_key_value[3] = 'In Progress';
         $defect_status_key_value[4] = 'Open';
         $defect_status_key_value[5] = 'Solved';
-        $defect_status_key_value[5] = 'Reopen';
-        $defect_status_key_value[6] = 'Deferred';
+        // $defect_status_key_value[5] = 'Reopen';
+        $defect_status_key_value[6] = 'Fixes';
+        $defect_status_key_value[7] = 'Request To Japan';
+        $defect_status_key_value[8] = 'Finish';
 
         $defect_priority_key_value = [];
         $defect_priority_key_value[1] = "Urgent";
@@ -330,7 +380,7 @@ class SlackRepository
 							"fields": [
 								{
 									"type": "mrkdwn",
-									"text": "*Task Name:* \n'.$defect->name.'"
+									"text": "*Requirements Name:* \n'.$defect->defect_name.'"
 								}
 							]
 						},
@@ -341,38 +391,12 @@ class SlackRepository
 									"type": "mrkdwn",
 									"text": "*Status:* \n'.$defect_status_key_value[$defect->status].'"
 								},
-								{
-									"type": "mrkdwn",
-									"text": "*Priority:* \n'.$defect_priority_key_value[$defect->severity].'"
-								}
-							]
-						},
-						{
-							"type": "section",
-							"fields": [
-								{
+                                {
 									"type": "mrkdwn",
 									"text": "*Created By:* \n'.$user->firstname .' '.$user->lastname.'"
-								},
-								{
-									"type": "mrkdwn",
-									"text": "*Estimated Hours:* \n'.$defect->estimated_hours.'"
 								}
 							]
 						},
-						{
-							"type": "section",
-							"fields": [
-								{
-									"type": "mrkdwn",
-									"text": "*Start Date:* \n'.$defect->start_date.'"
-								},
-								{
-									"type": "mrkdwn",
-									"text": "*End Date:* \n'.$defect->end_date.'"
-								}
-							]
-						}
 					]
 				}
 			]'

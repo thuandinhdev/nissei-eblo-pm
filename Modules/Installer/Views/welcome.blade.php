@@ -18,4 +18,7 @@
         <i class="fa fa-angle-right fa-fw" aria-hidden="true"></i>
       </a>
     </p>
+    <div class="text-center">
+        <a target="_blank" href="https://vipspm.chetsapp.de/documentation">Read documentation before start the installation.
+    </a>
 @endsection

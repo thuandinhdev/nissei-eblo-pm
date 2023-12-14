@@ -79,13 +79,6 @@ class Appointment extends Model
     protected $hidden = [];
 
     /**
-     * Searchable rules.
-     *
-     * @var array
-     */
-    protected $searchable;
-
-    /**
      * Instantiate a new model instance.
      *
      * @param Array $attributes [object]

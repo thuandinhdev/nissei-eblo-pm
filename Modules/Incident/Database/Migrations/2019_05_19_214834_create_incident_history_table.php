@@ -42,7 +42,7 @@ class CreateIncidentHistoryTable extends Migration
                     ->references('id')
                     ->on(config('core.acl.incidents_table'))
                     ->onDelete('cascade');
-                $table->string('description');
+                $table->mediumText('description');
                 $table->integer('created_by_id')->nullable();
                 $table->integer('commented_by_id')->nullable();
                 $table->integer('solved_by_id')->nullable();

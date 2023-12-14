@@ -1,4 +1,5 @@
 <?php
+
 namespace Modules\Timesheet\Repositories;
 
 use Auth;
@@ -505,11 +506,17 @@ class TimesheetRepository
      *
      * @return Boolean
      */
-    public function create($request)
+    public function create($request, $inputArray = [])
     {
         $user = Auth::user();
         $timesheet = new Timesheet;
-        $input = $request->all();
+
+        if(!empty($inputArray)) {
+            $input = $inputArray;
+        } else {
+            $input = $request->all();
+        }
+
         $input['created_user_id'] = $user->id;
         $input['decimal_time'] = $this->commonHelper->getDecimalTimeDiff($input['start_time'], $input['end_time']);
         $input['hour_time'] = $this->commonHelper->getHourTimeDiff($input['start_time'], $input['end_time']);

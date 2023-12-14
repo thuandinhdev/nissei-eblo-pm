@@ -56,7 +56,9 @@ class SettingRepository
 	 */
 	public function getSettings()
 	{
-		return Setting::select(['login_background', 'company_logo', 'default_language', 'allowed_for_registration', 'is_demo'])->first();
+		return Setting::select([
+			'login_background', 'company_logo', 'theme_layout', 'default_language', 'allowed_for_registration', 'is_demo'
+		])->first();
 	}
 
 	/**

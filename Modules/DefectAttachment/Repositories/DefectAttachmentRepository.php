@@ -58,7 +58,7 @@ class DefectAttachmentRepository
         $defectAttachment = DefectAttachment::where('defect_id', $defect_id)
             ->orderBy('id','desc')
             ->get();
-        
+
         if ($defectAttachment) {
             return $defectAttachment;
         }
@@ -81,7 +81,8 @@ class DefectAttachmentRepository
         // Upload attachment
         $defectAttachment->file_hash = $this->uploadHelper->uploadAttachment(
             $input,
-            'defect_attachment'
+            // 'defect_attachment'
+            'task_attachment'
         );
         $defectAttachment->fill($input);
         if ($defectAttachment->save()) {
@@ -121,7 +122,8 @@ class DefectAttachmentRepository
         if ($defectAttachment->delete()) {
             // --
             // Remove file
-            $files = public_path() .'/uploads/defect_attachment/'.
+            // $files = public_path() .'/uploads/defect_attachment/'.
+            $files = public_path() .'/uploads/task_attachment/'.
             $defectAttachment->file_hash;
             if (file_exists($files)) {
                 unlink($files);

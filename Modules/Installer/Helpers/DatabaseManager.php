@@ -255,6 +255,12 @@ class DatabaseManager
                 $settings->product_version = '2.0';
                 $settings->save();
             }
+
+            if ($settings->product_version < 2.1) {
+                $settings->product_version = '2.1';
+                $settings->save();
+            }
+
         } catch (Exception $e) {
             return $this->_response($e->getMessage(), $outputLog, 'error');
         }

@@ -13,4 +13,8 @@
 
 Route::prefix('slack')->group(function() {
     Route::get('/', 'SlackController@index');
+    Route::get('auth/redirect', 'SlackController@getSlackCode');
+    Route::post('channel/message', 'SlackController@createChannelMessage');
+    Route::post('command1', 'SlackController@getSlackCommand1');
 });
+

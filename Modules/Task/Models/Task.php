@@ -57,6 +57,7 @@ class Task extends Model
         'estimated_hours',
         'status',
         'progress',
+        'defect_id',
         'created_by',
         'description',
         'assign_to',

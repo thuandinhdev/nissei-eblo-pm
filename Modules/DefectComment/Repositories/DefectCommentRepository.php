@@ -65,7 +65,8 @@ class DefectCommentRepository
             $defectComment->attachments = $this->uploadHelper
                 ->uploadMultipleAttachment(
                     $input['files'],
-                    'defect_attachment'
+                    // 'defect_attachment'
+                    'task_attachment'
                 );
         }
 
@@ -91,7 +92,7 @@ class DefectCommentRepository
             $defect = Defect::findOrFail($defectComment->defect_id);
             if (!empty($defect)) {
                 $defectHistory = new DefectHistory;
-                $defectHistory->description = "Defect information commented : " .'<b>'.$defect->defect_name.'</b>';
+                $defectHistory->description = "Defect information commented : " .'<b>'.$defectComment->comment.'</b>';
                 $defectHistory->created_by_id = $defect->create_user_id;
                 $defectHistory->commented_by_id = Auth::user()->id;
                 $defect->history()->save($defectHistory);
@@ -184,7 +185,8 @@ class DefectCommentRepository
     private function _removeAttachments($attachments)
     {
         foreach ($attachments as $key => $value) {
-            $files = public_path() .'/uploads/defect_attachment/'. $value->file;
+            // $files = public_path() .'/uploads/defect_attachment/'. $value->file;
+            $files = public_path() .'/uploads/task_attachment/'. $value->file;
             if (file_exists($files)) {
                 unlink($files);
             }

@@ -45,15 +45,15 @@ class EmailsHelper
     public function sendmail($template = '', $parameters = [], $config = [])
     {
         try {
-            Mail::send(
-                $template,
-                $parameters,
-                function ($mail) use ($config) {
-                    $mail->to($config['email'], $config['name'])
-                        ->from($config['from'])
-                        ->subject($config['subject']);
-                }
-            );
+            // Mail::send(
+            //     $template,
+            //     $parameters,
+            //     function ($mail) use ($config) {
+            //         $mail->to($config['email'], $config['name'])
+            //             ->from($config['from'])
+            //             ->subject($config['subject']);
+            //     }
+            // );
         } catch (\Exception $e) {
         }
     }
@@ -75,27 +75,27 @@ class EmailsHelper
         $attachmentsFiles = []
     ) {
         try {
-            Mail::send(
-                ['html' => $template],
-                $parameters,
-                function ($mail) use ($config, $attachmentsFiles) {
-                    $mail->to($config['email'], $config['name'])
-                        ->from($config['from'])
-                        ->subject($config['subject']);
+            // Mail::send(
+            //     ['html' => $template],
+            //     $parameters,
+            //     function ($mail) use ($config, $attachmentsFiles) {
+            //         $mail->to($config['email'], $config['name'])
+            //             ->from($config['from'])
+            //             ->subject($config['subject']);
 
-                    if (!empty($attachmentsFiles)) {
-                        foreach ($attachmentsFiles as $key => $value) {
-                            $mail->attach(
-                                $value['file'],
-                                array(
-                                    'as'   => $value['name'],
-                                    'mime' => $value['mime']
-                                )
-                            );
-                        }
-                    }
-                }
-            );
+            //         if (!empty($attachmentsFiles)) {
+            //             foreach ($attachmentsFiles as $key => $value) {
+            //                 $mail->attach(
+            //                     $value['file'],
+            //                     array(
+            //                         'as'   => $value['name'],
+            //                         'mime' => $value['mime']
+            //                     )
+            //                 );
+            //             }
+            //         }
+            //     }
+            // );
         } catch (\Exception $e) { }
     }
 
@@ -112,12 +112,12 @@ class EmailsHelper
     private function _sendEmails($to, $name, $subject, $body)
     {
         try {
-            Mail::send([], [], function ($message) use ($to, $name, $subject, $body) {
-                    $message->setBody($body, 'text/html');
-                    $message->to($to, $name);
-                    $message->subject($subject);
-                }
-            );
+            // Mail::send([], [], function ($message) use ($to, $name, $subject, $body) {
+            //         $message->setBody($body, 'text/html');
+            //         $message->to($to, $name);
+            //         $message->subject($subject);
+            //     }
+            // );
             return [ 'status' => true ];
         } catch (\Exception $e) {
             return [ 'status' => false, 'msg' => $e->getMessage() ];
@@ -262,7 +262,7 @@ class EmailsHelper
                 $meeting_time_date = str_replace("{MEETING_TIME}", $meeting_time, $meeting_date_time);
                 $description = str_replace("{DESCRIPTION}", $meeting->description, $meeting_time_date);
                 $message = str_replace("{LOCATION}", $meeting->location, $description);
-                
+
                 $this->_sendEmailsInQueue($value->email, $name, $subject, $message);
             }
         }
@@ -294,7 +294,7 @@ class EmailsHelper
                 $meeting_time_date = str_replace("{MEETING_TIME}", $meeting_time, $meeting_date_time);
                 $description = str_replace("{DESCRIPTION}", $meeting->description, $meeting_time_date);
                 $message = str_replace("{LOCATION}", $meeting->location, $description);
-                
+
                 $this->_sendEmailsInQueue($value->email, $name, $subject, $message);
             }
         }
@@ -472,7 +472,7 @@ class EmailsHelper
         if (!empty($user) && !empty($email_template)) {
             $name = $user->firstname.' '.$user->lastname;
             $url = config('app.front_url').'/#/projects/detail/'.$project_id;
-            
+
             $message = $email_template->template_body;
             $subject = $email_template->template_subject;
 
@@ -514,7 +514,7 @@ class EmailsHelper
                 $this->_sendEmailsInQueue($user->email, $name, $subject, $message);
             }
         }
-        
+
     }
 
     /**
@@ -697,7 +697,7 @@ class EmailsHelper
                 $site_url = str_replace("{COMMENT_URL}", $url, $task_name);
                 $comment = str_replace("{COMMENT_MESSAGE}", $taskComment->comment, $site_url);
                 $message = str_replace("{SITE_NAME}", config('core.COMPANY_NAME'), $comment);
-                
+
                 $this->_sendEmailsInQueue(
                     $value->email,
                     $value->name,
@@ -721,7 +721,7 @@ class EmailsHelper
         $url = config('app.front_url').'/#/tasks/detail/'. $taskAttachment->task_id;
         $tasks = $this->_getAssignTaskUsers($taskAttachment->task_id);
         $email_template = EmailTemplate::where('type', 'task_attachment')->first();
-        
+
         if (!empty($email_template)) {
             foreach ($tasks->users as $key => $value) {
                 $message = $email_template->template_body;
@@ -731,7 +731,7 @@ class EmailsHelper
                 $task_name = str_replace("{TASK_NAME}", $tasks->name, $posted_by);
                 $site_url = str_replace("{TASK_URL}", $url, $task_name);
                 $message = str_replace("{SITE_NAME}", config('core.COMPANY_NAME'), $site_url);
-                
+
                 $this->_sendEmailsInQueue(
                     $value->email,
                     $value->name,
@@ -1121,7 +1121,7 @@ class EmailsHelper
                 $appointment_time_date = str_replace("{APPOINTEMENT_TIME}", $appointment_time, $appointment_date_time);
                 $description = str_replace("{DESCRIPTION}", $appointment->note, $appointment_time_date);
                 $message = str_replace("{LOCATION}", $appointment->location, $description);
-                
+
                 $this->_sendEmailsInQueue($value->email, $name, $subject, $message);
             }
         }
@@ -1162,8 +1162,8 @@ class EmailsHelper
 
                     $this->_sendEmailsInQueue(
                         $u->email,
-                        $u->firstname." ".$u->lastname, 
-                        $email_template->template_subject, 
+                        $u->firstname." ".$u->lastname,
+                        $email_template->template_subject,
                         $message
                     );
                 }
@@ -1196,8 +1196,8 @@ class EmailsHelper
 
             $this->_sendEmailsInQueue(
                 $req_user->email,
-                $req_user_name, 
-                $email_template->template_subject, 
+                $req_user_name,
+                $email_template->template_subject,
                 $message
             );
         }
@@ -1229,8 +1229,8 @@ class EmailsHelper
 
             $this->_sendEmailsInQueue(
                 $req_user->email,
-                $req_user_name, 
-                $email_template->template_subject, 
+                $req_user_name,
+                $email_template->template_subject,
                 $message
             );
         }
@@ -1266,12 +1266,12 @@ class EmailsHelper
             $pdfStream = $pdf->stream();
 
             try {
-                Mail::send([], [], function ($message) use ($subject, $estimate, $body, $pdfStream) {
-                    $message->setBody($body, 'text/html');
-                    $message->to($estimate->client->email, $estimate->client->full_name);
-                    $message->subject($subject);
-                    $message->attachData($pdfStream, $estimate->estimate_number.'.pdf', ['mime' => 'application/pdf']);
-                });
+                // Mail::send([], [], function ($message) use ($subject, $estimate, $body, $pdfStream) {
+                //     $message->setBody($body, 'text/html');
+                //     $message->to($estimate->client->email, $estimate->client->full_name);
+                //     $message->subject($subject);
+                //     $message->attachData($pdfStream, $estimate->estimate_number.'.pdf', ['mime' => 'application/pdf']);
+                // });
                 return [ 'status' => true ];
             } catch (\Exception $e) {
                 return [ 'status' => false, 'msg' => $e->getMessage() ];
@@ -1301,8 +1301,8 @@ class EmailsHelper
 
             $this->_sendEmailsInQueue(
                 $estimate->user->email,
-                $estimate->user->firstname.' '.$estimate->user->lastname, 
-                $subject, 
+                $estimate->user->firstname.' '.$estimate->user->lastname,
+                $subject,
                 $message
             );
         }
@@ -1330,8 +1330,8 @@ class EmailsHelper
 
             $this->_sendEmailsInQueue(
                 $estimate->user->email,
-                $estimate->user->firstname.' '.$estimate->user->lastname, 
-                $subject, 
+                $estimate->user->firstname.' '.$estimate->user->lastname,
+                $subject,
                 $message
             );
         }
@@ -1347,7 +1347,7 @@ class EmailsHelper
     public function sendEstimateThankYouEmail($estimate)
     {
         $email_template = EmailTemplate::where('type', 'thank_you_for_accepting_estimate')->first();
-        
+
         if (!empty($email_template)) {
             $client_name = $estimate->client->firstname.' '.$estimate->client->lastname;
             $subject = str_replace("{ESTIMATE_NUMBER}", $estimate->estimate_number, $email_template->template_subject);
@@ -1358,8 +1358,8 @@ class EmailsHelper
 
             $this->_sendEmailsInQueue(
                 $estimate->client->email,
-                $client_name, 
-                $subject, 
+                $client_name,
+                $subject,
                 $message
             );
         }
@@ -1375,7 +1375,7 @@ class EmailsHelper
     public function sendEstimateExpirationReminderEmail($estimate)
     {
         $email_template = EmailTemplate::where('type', 'estimate_expiration_reminder')->first();
-        
+
         if (!empty($email_template)) {
             $url = config('app.front_url').'/#/estimates/detail/'.$estimate->id;
             $client_name = $estimate->client->firstname.' '.$estimate->client->lastname;
@@ -1389,8 +1389,8 @@ class EmailsHelper
 
             $this->_sendEmailsInQueue(
                 $estimate->client->email,
-                $client_name, 
-                $subject, 
+                $client_name,
+                $subject,
                 $message
             );
         }
@@ -1428,12 +1428,12 @@ class EmailsHelper
             $pdfStream = $pdf->stream();
 
             try {
-                Mail::send([], [], function ($message) use ($subject, $invoice, $body, $pdfStream) {
-                    $message->setBody($body, 'text/html');
-                    $message->to($invoice->client->email, $invoice->client->full_name);
-                    $message->subject($subject);
-                    $message->attachData($pdfStream, $invoice->invoice_number.'.pdf', ['mime' => 'application/pdf']);
-                });
+                // Mail::send([], [], function ($message) use ($subject, $invoice, $body, $pdfStream) {
+                //     $message->setBody($body, 'text/html');
+                //     $message->to($invoice->client->email, $invoice->client->full_name);
+                //     $message->subject($subject);
+                //     $message->attachData($pdfStream, $invoice->invoice_number.'.pdf', ['mime' => 'application/pdf']);
+                // });
                 return [ 'status' => true ];
             } catch (\Exception $e) {
                 return [ 'status' => false, 'msg' => $e->getMessage() ];
@@ -1451,7 +1451,7 @@ class EmailsHelper
     public function sendInvoiceExpirationReminderEmail($invoice)
     {
         $email_template = EmailTemplate::where('type', 'invoice_overdue_notice')->first();
-        
+
         if (!empty($email_template)) {
             $url = config('app.front_url').'/#/invoices/detail/'.$invoice->id;
             $subject = str_replace("{INVOICE_NUMBER}", $invoice->invoice_number, $email_template->template_subject);
@@ -1464,8 +1464,8 @@ class EmailsHelper
 
             $this->_sendEmailsInQueue(
                 $invoice->client->email,
-                $invoice->client->full_name, 
-                $subject, 
+                $invoice->client->full_name,
+                $subject,
                 $message
             );
         }
@@ -1501,12 +1501,12 @@ class EmailsHelper
             $pdfStream = $pdf->stream();
 
             try {
-                Mail::send([], [], function ($message) use ($subject, $payment, $body, $pdfStream) {
-                    $message->setBody($body, 'text/html');
-                    $message->to($payment->client->email, $payment->client->full_name);
-                    $message->subject($subject);
-                    $message->attachData($pdfStream, $payment->receipt_number.'.pdf', ['mime' => 'application/pdf']);
-                });
+                // Mail::send([], [], function ($message) use ($subject, $payment, $body, $pdfStream) {
+                //     $message->setBody($body, 'text/html');
+                //     $message->to($payment->client->email, $payment->client->full_name);
+                //     $message->subject($subject);
+                //     $message->attachData($pdfStream, $payment->receipt_number.'.pdf', ['mime' => 'application/pdf']);
+                // });
                 return [ 'status' => true ];
             } catch (\Exception $e) {
                 return [ 'status' => false, 'msg' => $e->getMessage() ];
@@ -1535,8 +1535,8 @@ class EmailsHelper
 
             $this->_sendEmailsInQueue(
                 $payment->invoice->user->email,
-                $payment->invoice->user->full_name, 
-                $subject, 
+                $payment->invoice->user->full_name,
+                $subject,
                 $message
             );
         }

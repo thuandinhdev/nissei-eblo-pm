@@ -20,6 +20,3 @@ Route::group(
     }
 );
 
-Route::get('slack/auth/redirect', 'SlackController@getSlackCode');
-Route::post('slack/channel/message', 'SlackController@createChannelMessage');
-Route::post('slack/command1', 'SlackController@getSlackCommand1');

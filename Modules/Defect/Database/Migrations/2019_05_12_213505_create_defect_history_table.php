@@ -42,7 +42,7 @@ class CreateDefectHistoryTable extends Migration
                     ->references('id')
                     ->on(config('core.acl.defects_table'))
                     ->onDelete('cascade');
-                $table->string('description');
+                $table->mediumText('description');
                 $table->integer('created_by_id');
                 $table->integer('commented_by_id')->nullable();
                 $table->integer('solved_by_id')->nullable();

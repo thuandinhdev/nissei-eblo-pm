@@ -195,10 +195,9 @@ class TaskCommentRepository
         $taskComment = TaskComment::findOrFail($id);
         $taskUser = Task::where('id', $taskComment->task_id)
             ->where(function ($q) {
-                    $q->where('assign_to', Auth::user()->id)
-                        ->orWhere('created_by', Auth::user()->id);
-                }
-            )->first();
+                $q->where('assign_to', Auth::user()->id)
+                    ->orWhere('created_by', Auth::user()->id);
+            })->first();
 
         if ($taskUser) {
             return true;

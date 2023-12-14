@@ -352,7 +352,10 @@ class MeetingRepository
     public function getMeetingForCalendar()
     {
         $user = Auth::user();
-        return $user->meetings()->orderBy('created_at', 'DESC')->get();
+        return $user->meetings()
+            ->whereNotIn('status', [3, 4])
+            ->orderBy('created_at', 'DESC')
+            ->get();
     }
 
     /**

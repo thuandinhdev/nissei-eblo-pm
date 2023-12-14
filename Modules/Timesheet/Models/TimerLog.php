@@ -3,32 +3,26 @@
 namespace Modules\Timesheet\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
-
-use Modules\Timesheet\Models\Attribute\TimesheetAttribute;
-use Modules\Timesheet\Models\Relationship\TimesheetRelationship;
 
 /**
- * Class Timesheet
+ * Class TimerLog
  *
- * The Model is Defined for Timesheet.
+ * The Model is Defined for Timer Log.
  *
  * PHP version 7.1.3
  *
  * @category  PM
  * @package   Modules\Timesheet
  * @author    Vipul Patel <vipul@chetsapp.com>
- * @copyright 2019 Chetsapp Group
+ * @copyright 2020 Chetsapp Group
  * @license   Chetsapp Private Limited
- * @version   Release: @1.0@
+ * @version   Release: @2.1@
  * @link      http://chetsapp.com
- * @since     Class available since Release 1.0
+ * @since     Class available since Release 2.1
  */
-class Timesheet extends Model
+class TimerLog extends Model
 {
-    use SoftDeletes, TimesheetAttribute, TimesheetRelationship;
-
-    const MODULE_NAME = 'Timesheet';
+    const MODULE_NAME = 'TimerLog';
 
     /**
      * The table associated with the model.
@@ -44,16 +38,13 @@ class Timesheet extends Model
      */
 
     protected $fillable = [
+        'user_id',
         'project_id',
-        'module_id',
-        'module_related_id',
-        'start_time',
-        'end_time',
-        'decimal_time',
-        'hour_time',
-        'note',
-        'created_user_id',
-        'deleted_user_id'
+        'reference_id',
+        'is_task_timer',
+        'is_defect_timer',
+        'is_incident_timer',
+        'start_time'
     ];
 
     /**
@@ -75,7 +66,7 @@ class Timesheet extends Model
      *
      * @var array
      */
-    protected $dates = ['deleted_at'];
+    protected $dates = [];
 
     /**
      * Instantiate a new model instance.
@@ -88,6 +79,6 @@ class Timesheet extends Model
     {
         parent::__construct($attributes);
 
-        $this->table = config('core.acl.timesheets_table');
+        $this->table = config('core.acl.timer_logs_table');
     }
 }

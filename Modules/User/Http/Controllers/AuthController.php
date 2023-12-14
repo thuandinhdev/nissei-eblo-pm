@@ -15,6 +15,8 @@ use Modules\User\Http\Requests\RegisterUserRequest;
 use Modules\User\Models\User\User;
 use Modules\User\Models\Department\DepartmentRoleUser;
 use Modules\User\Repositories\UserRepository;
+use Modules\Timesheet\Models\TimerLog;
+use Modules\Timesheet\Repositories\TimesheetRepository;
 
 /**
  * Class AuthController
@@ -40,6 +42,7 @@ class AuthController extends Controller
 	protected $helper;
 	protected $userRepo;
 	protected $helperRepo;
+	protected $timesheetRepository;
 
 	/**
 	 * Create a new AuthController instance.
@@ -53,7 +56,8 @@ class AuthController extends Controller
 	public function __construct(
 		EmailsHelper $helper,
 		UserRepository $userRepo,
-		HelperRepository $helperRepo
+		HelperRepository $helperRepo,
+		TimesheetRepository $timesheetRepository
 	) {
 		$this->middleware(
 			'auth:api',
@@ -63,6 +67,7 @@ class AuthController extends Controller
 		$this->helper = $helper;
 		$this->userRepo = $userRepo;
 		$this->helperRepo = $helperRepo;
+		$this->timesheetRepository = $timesheetRepository;
 	}
 
 	/**
@@ -132,6 +137,7 @@ class AuthController extends Controller
 	 */
 	public function login(LoginUserRequest $request)
 	{
+        // dd(env('APP_URL'));
 		// --
 		// Credentials
 		$credentials = $this->credentials($request);
@@ -150,7 +156,7 @@ class AuthController extends Controller
 		// Validate user
 		if ($this->guard()->validate($this->credentials($request))) {
 			$user = $this->guard()->getLastAttempted();
-				
+
 			// --
 			// Make sure the user is active
 			if ($user->is_active && $this->attemptLogin($request)) {
@@ -241,12 +247,40 @@ class AuthController extends Controller
 	 *
 	 * @return Response
 	 */
-	public function logout()
+	public function logout(Request $request)
 	{
 		$user = auth()->user();
 		if (!empty($user)) {
 			$user->online_status = false;
 			$user->save();
+
+			// --
+			// Save log entry
+			$timerLog = TimerLog::where('user_id', $user->id)->first();
+			$module_id = 0;
+
+			if(!empty($timerLog)) {
+				if($timerLog->is_task_timer) {
+					$module_id = 2;
+				}
+				if($timerLog->is_defect_timer) {
+					$module_id = 3;
+				}
+				if($timerLog->is_incident_timer) {
+					$module_id = 4;
+				}
+
+				$this->timesheetRepository->create($request, [
+					"project_id" => $timerLog->project_id,
+					"module_id" => $module_id,
+					"module_related_id" => $timerLog->reference_id,
+					"start_time" =>  $timerLog->start_time,
+					"end_time" =>  date('Y-m-d H:i:s')
+				]);
+
+				$timerLog->forceDelete();
+			}
+
 			auth()->logout();
 		}
 		return response()->json('success');
@@ -295,7 +329,7 @@ class AuthController extends Controller
 			[
 			'token' => $token,
 			'token_type' => 'bearer',
-			'expires_in' => auth()->factory()->getTTL() * 90
+			'expires_in' => auth()->factory()->getTTL() * 9000
 			]
 		);
 	}

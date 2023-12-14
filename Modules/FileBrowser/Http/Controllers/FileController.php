@@ -135,7 +135,7 @@ class FileController extends Controller
                 $request->file('file')->getClientOriginalName(),
                 '.'.$request->file('file')->getClientOriginalExtension()
             );
-            $path = $fileBaseName.'-'.uniqid().'.'.$fileExt;
+            $path = uniqid().'.'.$fileExt;
             $folder = $request->input('folder');
             $request->file('file')->move(public_path("/uploads/filebrowser"), $path);
 
@@ -154,12 +154,10 @@ class FileController extends Controller
             $file->file_hash = $path;
             $file->save();
 
-            return response()->json(
-                [
+            return response()->json([
                 'success' => 'File has been uploaded.',
                 'id' => $file->id
-                ], 200
-            );
+            ], 200);
         } else {
             return response()->json(['error' => 'Error while creating.'], 400);
         }

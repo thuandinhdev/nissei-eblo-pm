@@ -11,6 +11,7 @@ use Modules\Helper\Helpers\UploadFileHelper;
 use Modules\Helper\Repositories\HelperRepository;
 use Modules\Projects\Models\Project;
 use Modules\Team\Models\Team;
+use Modules\Task\Models\Task;
 use Modules\Timesheet\Models\Timesheet;
 use Modules\UserActivity\Models\UserActivity;
 use Modules\User\Models\User\User;
@@ -100,6 +101,7 @@ class DefectRepository
 	{
 		$defects_table = config('core.acl.defects_table');
 		$user_table = config('core.acl.users_table');
+        $projects_table = config('core.acl.projects_table');
 		$user = Auth::user();
 
 		$columns = array(
@@ -129,8 +131,8 @@ class DefectRepository
 
 		} elseif($request->has('filter') && $request->get('filter') === "selected") {
             $defect = Defect::where(function ($query) use ($defects_table, $user) {
-	            $query->where($defects_table.'.assign_member', $user->id)
-	            	->orWhere($defects_table.'.create_user_id', $user->id);
+	            // $query->where($defects_table.'.assign_member', $user->id)
+	            // 	->orWhere($defects_table.'.create_user_id', $user->id);
 	        });
             $statusCount = $this->_getDefectCount(true);
         } else {
@@ -144,8 +146,10 @@ class DefectRepository
 		$order = $columns[$request->input('order.0.column')];
 		$dir = $request->input('order.0.dir');
 
-		$defect =  $defect->select(
+		$defect =  $defect->leftjoin($projects_table, $projects_table.'.id', '=', $defects_table.'.project_id')
+            ->select(
 			$defects_table.'.*',
+            $projects_table.'.project_name',
 			'defect_assigned.firstname as assigned_firstname',
 			'defect_assigned.lastname as assigned_lastname',
 			'defect_assigned.avatar as assigned_avatar'
@@ -157,15 +161,15 @@ class DefectRepository
 			$defects_table.'.assign_member'
 		);
 
-		if ($status) {
-			if ($status == 4) {
-				$defect->whereIn($defects_table.'.status', [4, 6]);
-			}elseif ($status == 5) {
-				$defect->whereIn($defects_table.'.status', [2, 5, 7]);
-			}else{
-				$defect->whereIn($defects_table.'.status', [$status]);
-			}
-		}
+		// if ($status) {
+		// 	if ($status == 4) {
+		// 		$defect->whereIn($defects_table.'.status', [4, 6]);
+		// 	}elseif ($status == 5) {
+		// 		$defect->whereIn($defects_table.'.status', [2, 5, 7]);
+		// 	}else{
+		// 		$defect->whereIn($defects_table.'.status', [$status]);
+		// 	}
+		// }
 
 		$totalData = $defect->count();
 		$totalFiltered = $totalData;
@@ -200,6 +204,10 @@ class DefectRepository
 			->orderBy($order, $dir)
 			->get();
 
+        foreach ($data as $value) {
+            $value['tasks'] = Task::where('defect_id', $value['id'])->count();
+            $value['tasks_completed'] = Task::where('defect_id', $value['id'])->where('status', 6)->count();
+        }
 		return array(
 			"draw"            => intval($request->input('draw')),
 			"recordsTotal"    => intval($totalData),
@@ -405,7 +413,7 @@ class DefectRepository
 
 			// --
             // Post message to slack
-            //$this->slackRepo->postActivitiesMessage('Defect Created Successfully', $defect, 'Defect');
+            $this->slackRepo->postActivitiesMessage('Defect Created Successfully', $defect, 'Defect');
 
 			// --
 			// Add defect history
@@ -508,7 +516,7 @@ class DefectRepository
 
 			// --
             // Post message to slack
-            //$this->slackRepo->postActivitiesMessage('Defect Updated Successfully', $defect, 'Defect');
+            $this->slackRepo->postActivitiesMessage('Defect Updated Successfully', $defect, 'Defect');
 
 			// --
 			// Add defect history
@@ -551,6 +559,7 @@ class DefectRepository
 	public function defectNotesUpdate($request, $id)
 	{
 		$input = $request->all();
+        $user = Auth::user();
 		$defect = Defect::findOrFail($id);
 
 		if ($defect->fill($input)->save()) {
@@ -567,7 +576,7 @@ class DefectRepository
 
 			// --
             // Post message to slack
-            //$this->slackRepo->postActivitiesMessage('Defect Updated Successfully', $defect, 'Defect');
+            $this->slackRepo->postActivitiesMessage('Defect Updated Successfully', $defect, 'Defect');
 
 			// --
 			// Add defect history
@@ -625,11 +634,11 @@ class DefectRepository
 
 			// --
             // Post message to slack
-            //$this->slackRepo->postActivitiesMessage('Defect Status Changed Successfully', $defect, 'Defect');
+            $this->slackRepo->postActivitiesMessage('Defect Status Changed Successfully', $defect, 'Defect');
 
 			// --
 			// Send email
-			$this->emailsHelper->sendDefectStatusChangeMails($user,$defect);
+			// $this->emailsHelper->sendDefectStatusChangeMails($user,$defect);
 			return true;
 		}
 		return false;
@@ -674,7 +683,7 @@ class DefectRepository
 
 			// --
             // Post message to slack
-            //$this->slackRepo->postActivitiesMessage('Defect Severity Changed Successfully', $defect, 'Defect');
+            $this->slackRepo->postActivitiesMessage('Defect Severity Changed Successfully', $defect, 'Defect');
 
 			return true;
 		}
@@ -692,6 +701,7 @@ class DefectRepository
 	public function delete($request, $id)
 	{
 		$defect = Defect::findOrFail($id);
+        $user = Auth::user();
 		if ($defect) {
 			$defect->users()->detach();
 			if ($defect->attachment_hash) {
@@ -712,7 +722,7 @@ class DefectRepository
 
 				// --
 	            // Post message to slack
-	            //$this->slackRepo->postActivitiesMessage('Defect Deleted Successfully', $defect, 'Defect');
+	            $this->slackRepo->postActivitiesMessage('Defect Deleted Successfully', $defect, 'Defect');
 
 				// --
 				// Add defect history
@@ -776,12 +786,12 @@ class DefectRepository
 		if (!empty($userData)) {
 			// --
 			// Send email
-			$this->emailsHelper->sendDefectAssignMails(
-				$userData,
-				$loginUserName,
-				$subjects,
-				$defect
-			);
+			// $this->emailsHelper->sendDefectAssignMails(
+			// 	$userData,
+			// 	$loginUserName,
+			// 	$subjects,
+			// 	$defect
+			// );
 		}
 		return true;
 	}

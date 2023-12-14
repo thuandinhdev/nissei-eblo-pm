@@ -39,5 +39,6 @@ Route::group(
         Route::post('tasks/convertsprinttask-to-task', 'TaskController@convertSprintTaskToTask');
         Route::get('tasks/{id}/permission/{type}', 'TaskController@getTaskPermission');
         Route::resource('tasks', 'TaskController');
+        Route::post('tasks/copy', 'TaskController@copyDefectToTask');
     }
 );

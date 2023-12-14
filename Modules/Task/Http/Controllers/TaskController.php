@@ -204,9 +204,9 @@ class TaskController extends Controller
     {
         // --
         // Check task user permission
-        if (!$this->taskRepo->checkPermission($id)) {
-            return response()->json("Access denied", 403);
-        }
+        // if (!$this->taskRepo->checkPermission($id)) {
+        //     return response()->json("Access denied", 403);
+        // }
 
         if ($this->taskRepo->changeStatus($request, $id)) {
             return response()->json('success');
@@ -252,7 +252,7 @@ class TaskController extends Controller
         if (!AdminHelper::can_action(44, 'view')) {
             return response()->json("Access denied", 403);
         }
-        
+
         return $this->taskRepo->getTaskForTaskBoard($request);
     }
 
@@ -313,7 +313,7 @@ class TaskController extends Controller
         $request->validate(['csv_file' => 'required']);
         $error_file = [];
         $input = $request->all();
-        
+
         $csvData  = explode("\n", $input['csv_file']);
         foreach ($csvData as $key => $value) {
             $csvData[$key] = explode(',', $value);
@@ -349,7 +349,7 @@ class TaskController extends Controller
             if (is_array($error_file) && count($error_file) > 0) {
                 return response()->json(['error' => $error_file ], 422);
             }
-            
+
             $res = $this->taskRepo->createImportTask($request, $csvData);
             return response()->json(['success' => $res]);
         } else {
@@ -391,7 +391,7 @@ class TaskController extends Controller
         if (!AdminHelper::can_action(51, 'view')) {
             return response()->json("Access denied", 403);
         }
-        
+
         return $this->taskRepo->getTaskForReport($request);
     }
 
@@ -433,6 +433,18 @@ class TaskController extends Controller
         }
 
         $task = $this->taskRepo->convertSprintTaskToTask($request);
+
+        if ($task) {
+            return response()->json("success");
+        }
+        return response()->json('Task is not created successfully', 401);
+    }
+
+
+    public function copyDefectToTask(CreateTaskRequest $request)
+    {
+
+        $task = $this->taskRepo->copyDefectToTask($request);
 
         if ($task) {
             return response()->json("success");

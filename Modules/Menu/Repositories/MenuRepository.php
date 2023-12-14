@@ -168,10 +168,8 @@ class MenuRepository
     {
         $menus = [];
         $menuItems = [];
-
         // --
         // Get departments/roles
-
         if (!empty(\Auth::user())) {
             $roles = \Auth::user()->roles()->get()->pluck('id');
             $departments = \Auth::user()->departments()->get()->pluck('id');
@@ -179,17 +177,25 @@ class MenuRepository
             $department_role_menu_table = config('core.acl.department_role_menu_table');
             $menu_table = config('core.acl.menu_table');
 
-            $menus = DepartmentRoleMenu::select($menu_table.'.*')
-                ->Join($menu_table, $department_role_menu_table . '.menu_id', '=', $menu_table.'.id')
-                ->whereIn($department_role_menu_table. '.department_id', $departments)
-                ->whereIn($department_role_menu_table. '.role_id', $roles)
-                ->where($menu_table. '.status', 1)
-                ->where($menu_table. '.module', '!=', 'settings')
-                ->where($menu_table. '.module', '!=', 'webs')
-                ->where($menu_table. '.module', '!=', 'utilities')
-                ->orderBy($menu_table.'.order')
-                ->distinct($menu_table.'.id')
-                ->get();
+                if(\Auth::user()['is_super_admin'] != 1){
+                    $menus = DepartmentRoleMenu::select($menu_table.'.*')
+                    ->Join($menu_table, $department_role_menu_table . '.menu_id', '=', $menu_table.'.id')
+                    ->whereIn($department_role_menu_table. '.department_id', $departments)
+                    ->whereIn($department_role_menu_table. '.role_id', $roles)
+                    ->where($menu_table. '.status', 1)
+                    ->where($menu_table. '.module', '!=', 'settings')
+                    ->where($menu_table. '.module', '!=', 'utilities')
+                    ->orderBy($menu_table.'.order')
+                    ->distinct($menu_table.'.id')
+                    ->get();
+                } else {
+                    $menus = Menu::where('status', 1)
+                    ->where('module', '!=', 'settings')
+                    ->where('module', '!=', 'utilities')
+                    ->orderBy('order')
+                    ->distinct('id')
+                    ->get();
+                }
 
             if ($menus) {
                 foreach ($menus as $key => $value) {
@@ -252,10 +258,9 @@ class MenuRepository
             if ($element->module == 'admin' && !$user->hasRole('admin')) {
                 continue;
             }
-
             //--
             // Check view permissions
-            if (!$user->allow($element->label)) {
+            if (!$user->allow($element->label) && \Auth::user()['is_super_admin'] != 1) {
                 continue;
             }
 
@@ -331,8 +336,8 @@ class MenuRepository
         // Add user assign permissions
         if ($user->permission == 'all') {
             // array_push($permissions, 'users_view');
-            array_push($permissions, 'users_edit');
-            array_push($permissions, 'users_delete');
+            // array_push($permissions, 'users_edit');
+            // array_push($permissions, 'users_delete');
         } else {
             foreach ((array)json_decode($user->permission) as $key => $value) {
                 foreach ($value as $key => $value1) {

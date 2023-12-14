@@ -21,5 +21,6 @@ Route::group(
         Route::post('project-timesheets', 'TimesheetController@getProjectTimesheets');
         Route::post('timesheets-report', 'TimesheetController@getTimesheetsReport');
         Route::resource('timesheets', 'TimesheetController');
+        Route::resource('timer-logs', 'TimerLogsController');
     }
 );

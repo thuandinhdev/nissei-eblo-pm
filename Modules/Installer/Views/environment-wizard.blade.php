@@ -285,6 +285,7 @@
 
 			<div class="form-group {{ $errors->has('app_url') ? ' has-error ' : '' }}">
 				<label for="app_url">
+					<span class="text-info">API URL and Front URL protocol should be same.</span><br>
 					{{ trans('installer_messages.environment.wizard.form.app_url_label') }}
 					<span class="text-danger">&nbsp;*</span>
 					<span class="text-success">{{ trans('installer_messages.environment.wizard.form.app_url_info') }}</span>
@@ -297,9 +298,7 @@
 				</span>
 				@endif
 				<div class="form-group has-error">
-					<span class="text-light bg-dark">
-						ex.https://vipspm.chetsapp.de/public
-					</span>
+					<span class="text-light bg-dark">ex.https://vipspm.chetsapp.de/public</span>
 				</div>
 			</div>
 
@@ -317,9 +316,7 @@
 				</span>
 				@endif
 				<div class="form-group has-error">
-					<span class="text-light bg-dark">
-						ex.https://vipspm.chetsapp.de
-					</span>
+					<span class="text-light bg-dark">ex.https://vipspm.chetsapp.de</span>
 				</div>
 			</div>
 
